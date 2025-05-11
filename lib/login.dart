@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
 
 class LoginPage extends StatefulWidget {
+   const LoginPage({super.key});
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -11,11 +13,34 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  void _login() {
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    if (isLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    }
+  }
+
+  Future<void> _login() async {
     String username = usernameController.text.trim();
     String password = passwordController.text.trim();
 
-    if (username == '2315091038' && password == '2315091038') {
+    if (username == 'AnggaPrabaswara' && password == '2315091038') {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('username', username); // Simpan username
+      await prefs.setString('password', password); // ✅ Simpan password
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
@@ -50,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                 style: GoogleFonts.poppins(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.blue.shade800),
               ),
               SizedBox(height: 30),
-              _buildTextField(usernameController, "Username (NIM)", Icons.person),
+              _buildTextField(usernameController, "Username", Icons.person),
               SizedBox(height: 15),
               _buildTextField(passwordController, "Password", Icons.lock, obscureText: true),
               SizedBox(height: 25),
